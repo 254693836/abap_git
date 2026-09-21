@@ -46,7 +46,7 @@ annotate entity zlyz_course_cds_p
   @UI.identification: [
     { position: 20, label: '名前' }
   ]
-  @EndUserText.label: '名前'
+  @EndUserText.label: '名前-02'
   Name;
 
 

@@ -1,0 +1,4 @@
+@EndUserText.label: 'ZLYZ_COURSE_CDS_sd'
+define service ZLYZ_COURSE_CDS_sd {
+  expose zlyz_course_cds_p;
+}

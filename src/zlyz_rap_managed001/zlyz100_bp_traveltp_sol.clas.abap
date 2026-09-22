@@ -1,0 +1,5 @@
+CLASS zlyz100_bp_traveltp_sol DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zlyz100_r_traveltp_sol.
+ENDCLASS.
+
+CLASS zlyz100_bp_traveltp_sol IMPLEMENTATION.
+ENDCLASS.

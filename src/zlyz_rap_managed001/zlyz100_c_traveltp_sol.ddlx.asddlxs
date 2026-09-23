@@ -60,7 +60,7 @@ annotate view zlyz100_C_TRAVELTP_SOL with
 
   @UI: {
   lineItem:       [ { position: 100, importance: #HIGH }                          
-                    ,{ type: #FOR_ACTION, dataAction: 'copyTravel', label: 'Copy Trave操作1' } 
+                    ,{ type: #FOR_ACTION, dataAction: 'copyTravel', label: 'Copy Trave操作1_xxx' } 
                     ,{ type: #FOR_ACTION, dataAction: 'acceptTravel', label: 'Accept Travel操作2' }
                     ,{ type: #FOR_ACTION, dataAction: 'rejectTravel', label: 'Reject Travel操作3' }
        ],

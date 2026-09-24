@@ -1,15 +1,15 @@
-class ZLYZ210_BP_TRAVELTP_SOL definition
-  public
-  abstract
-  final
-  for behavior of ZLYZ210_R_TRAVELTP_SOL .
+CLASS zlyz210_bp_traveltp_sol DEFINITION
+  PUBLIC
+  ABSTRACT
+  FINAL
+  FOR BEHAVIOR OF zlyz210_r_traveltp_sol .
 
-public section.
-protected section.
-private section.
+  PUBLIC SECTION.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZLYZ210_BP_TRAVELTP_SOL IMPLEMENTATION.
+CLASS zlyz210_bp_traveltp_sol IMPLEMENTATION.
 ENDCLASS.

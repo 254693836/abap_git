@@ -2,13 +2,12 @@ managed implementation in class zlyz210_BP_TravelTP_SOL unique;
 strict ( 2 );
 with draft;
 define behavior for ZLYZ210_R_TRAVELTP_SOL alias Travel
-persistent table zlyz210_atravsol
 draft table zlyz210_dtravsol
 etag master LocalLastChangedAt
 lock master total etag LastChangedAt
 authorization master ( global )
 late numbering
-with additional save with full data
+with unmanaged save with full data
 {
   field ( readonly )
   LocalLastChangedAt,
@@ -91,12 +90,12 @@ with additional save with full data
 
 define behavior for ZLYZ210_R_BOOKINGTP_SOL alias Booking
 implementation in class zlyz210_BP_BookingTP_SOL unique
-persistent table zlyz210_abooksol
 draft table zlyz210_dbooksol
 etag master LocalLastChangedAt
 lock dependent by _Travel
 authorization dependent by _Travel
 late numbering
+with unmanaged save with full data
 
 {
   field ( readonly )

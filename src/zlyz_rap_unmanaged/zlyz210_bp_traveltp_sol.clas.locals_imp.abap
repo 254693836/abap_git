@@ -1,3 +1,19 @@
+CLASS lcl_travel_comparison DEFINITION FINAL.
+  PUBLIC SECTION.
+    CLASS-METHODS matches_database
+      IMPORTING is_input TYPE zlyz210_a_add_action001_sol
+                is_database TYPE zlyz210_r_traveltp_sol
+      RETURNING VALUE(rv_matches) TYPE abap_bool.
+ENDCLASS.
+
+CLASS lcl_travel_comparison IMPLEMENTATION.
+  METHOD matches_database.
+    "Compare every parameter, including initial values, binary data and ETags.
+    DATA(database_values) = CORRESPONDING zlyz210_a_add_action001_sol( is_database ).
+    rv_matches = xsdbool( is_input = database_values ).
+  ENDMETHOD.
+ENDCLASS.
+
 **********************************************************************
 **  Local Saver Class of Travel BO entity                           **
 **********************************************************************
@@ -181,6 +197,12 @@ CLASS lhc_travel DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS acceptTravel FOR MODIFY
       IMPORTING keys FOR ACTION Travel~acceptTravel RESULT result.
 
+    METHODS ADD_ACTION001 FOR MODIFY
+      IMPORTING keys FOR ACTION Travel~ADD_ACTION001 RESULT result.
+
+    METHODS GetDefaultsForAddAction001 FOR READ
+      IMPORTING keys FOR FUNCTION Travel~GetDefaultsForAddAction001 RESULT result.
+
     METHODS createTravel FOR MODIFY
       IMPORTING keys FOR ACTION Travel~createTravel.
 
@@ -207,6 +229,80 @@ CLASS lhc_travel DEFINITION INHERITING FROM cl_abap_behavior_handler.
 ENDCLASS.
 
 CLASS lhc_travel IMPLEMENTATION.
+  METHOD GetDefaultsForAddAction001.
+    "Prefill the action dialog from the current active/draft transactional data.
+    READ ENTITIES OF zlyz210_r_traveltp_sol IN LOCAL MODE
+      ENTITY Travel
+        ALL FIELDS WITH CORRESPONDING #( keys )
+      RESULT DATA(travels)
+      FAILED failed
+      REPORTED reported.
+
+    result = VALUE #( FOR travel IN travels
+      ( %tky = travel-%tky
+        %param = CORRESPONDING #( travel ) ) ).
+  ENDMETHOD.
+
+  METHOD ADD_ACTION001.
+    IF keys IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    "Resolve the bound instances first, including draft identity and read errors.
+    READ ENTITIES OF zlyz210_r_traveltp_sol IN LOCAL MODE
+      ENTITY Travel
+        FIELDS ( TravelID ) WITH CORRESPONDING #( keys )
+      RESULT DATA(travels)
+      FAILED failed
+      REPORTED reported.
+
+    IF travels IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    "SQL deliberately reads active persisted values, not the RAP/draft buffer.
+    "Use the bound TravelID, never an unrelated ID supplied in the parameter.
+    SELECT FROM zlyz210_r_traveltp_sol
+      FIELDS *
+      FOR ALL ENTRIES IN @travels
+      WHERE TravelID = @travels-TravelID
+      INTO TABLE @DATA(database_travels).
+
+    LOOP AT keys INTO DATA(key).
+      READ TABLE travels WITH KEY %tky = key-%tky
+        TRANSPORTING NO FIELDS.
+      IF sy-subrc <> 0.
+        CONTINUE.
+      ENDIF.
+
+      READ TABLE database_travels WITH KEY TravelID = key-TravelID
+        INTO DATA(database_travel).
+      IF sy-subrc <> 0.
+        APPEND VALUE #( %tky = key-%tky ) TO failed-travel.
+        APPEND VALUE #( %tky = key-%tky
+          %msg = new_message_with_text(
+            severity = if_abap_behv_message=>severity-error
+            text = 'DBに対象の旅行が存在しません。' ) ) TO reported-travel.
+        CONTINUE.
+      ENDIF.
+
+      IF lcl_travel_comparison=>matches_database(
+           is_input = key-%param
+           is_database = database_travel ) = abap_false.
+        APPEND VALUE #( %tky = key-%tky ) TO failed-travel.
+        APPEND VALUE #( %tky = key-%tky
+          %msg = new_message_with_text(
+            severity = if_abap_behv_message=>severity-error
+            text = 'この値修正しました' ) ) TO reported-travel.
+        CONTINUE.
+      ENDIF.
+
+      "Return the DB snapshot without modifying or committing either instance.
+      APPEND VALUE #( %tky = key-%tky
+        %param = CORRESPONDING #( database_travel ) ) TO result.
+    ENDLOOP.
+  ENDMETHOD.
+
   METHOD get_global_authorizations.
   ENDMETHOD.
 **************************************************************************

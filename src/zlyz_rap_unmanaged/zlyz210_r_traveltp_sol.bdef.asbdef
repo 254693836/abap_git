@@ -32,6 +32,8 @@ with unmanaged save with full data
   event travel_rejected;
 
   //action(s)
+  action ADD_ACTION001 parameter ZLYZ210_A_ADD_ACTION001_SOL result [1] $self
+    { default function GetDefaultsForAddAction001; }
   action ( features : instance ) acceptTravel result [1] $self;
   action ( features : instance ) rejectTravel result [1] $self;
   internal action recalcTotalPrice;

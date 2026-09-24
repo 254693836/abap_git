@@ -79,6 +79,43 @@ CLASS lsc_zlyz210_r_traveltp_SOL IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD save_modified.
+    "Persist active data only. Draft persistence and the final commit belong to RAP.
+    "adjust_numbers has already assigned the final TravelID and BookingID.
+    IF create-travel IS NOT INITIAL.
+      INSERT zlyz210_atravsol FROM TABLE @create-travel MAPPING FROM ENTITY.
+      ASSERT sy-subrc = 0.
+    ENDIF.
+
+    IF create-booking IS NOT INITIAL.
+      INSERT zlyz210_abooksol FROM TABLE @create-booking MAPPING FROM ENTITY.
+      ASSERT sy-subrc = 0.
+    ENDIF.
+
+    "Use the change indicators so that unchanged fields are preserved.
+    IF update-travel IS NOT INITIAL.
+      UPDATE zlyz210_atravsol FROM TABLE @update-travel
+        INDICATORS SET STRUCTURE %control MAPPING FROM ENTITY.
+      ASSERT sy-subrc = 0.
+    ENDIF.
+
+    IF update-booking IS NOT INITIAL.
+      UPDATE zlyz210_abooksol FROM TABLE @update-booking
+        INDICATORS SET STRUCTURE %control MAPPING FROM ENTITY.
+      ASSERT sy-subrc = 0.
+    ENDIF.
+
+    "Delete children before their parent, including a complete Travel deletion.
+    LOOP AT delete-booking INTO DATA(booking_delete).
+      DELETE FROM zlyz210_abooksol
+        WHERE travel_id = @booking_delete-TravelID
+          AND booking_id = @booking_delete-BookingID.
+    ENDLOOP.
+
+    LOOP AT delete-travel INTO DATA(travel_delete).
+      DELETE FROM zlyz210_abooksol WHERE travel_id = @travel_delete-TravelID.
+      DELETE FROM zlyz210_atravsol WHERE travel_id = @travel_delete-TravelID.
+    ENDLOOP.
+
     "send notification for all accepted and rejected travel instances
     IF update IS NOT INITIAL.
 

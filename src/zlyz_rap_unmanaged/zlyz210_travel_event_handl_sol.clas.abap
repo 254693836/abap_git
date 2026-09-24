@@ -1,0 +1,14 @@
+CLASS zlyz210_travel_event_handl_sol DEFINITION
+  PUBLIC
+  FINAL FOR EVENTS OF zlyz210_r_traveltp_sol
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zlyz210_travel_event_handl_sol IMPLEMENTATION.
+ENDCLASS.
